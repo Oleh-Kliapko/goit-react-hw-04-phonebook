@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Notification } from '../../utils/notification';
 import { theme } from '../../utils/theme';
@@ -7,67 +7,57 @@ import { WrapperPhonebook, WrapperContacts } from './Phonebook.styled';
 import { ContactForm } from '../ContactForm/ContactForm';
 import { ContactsList } from '../ContactsList/ContactsList';
 import { Filter } from '../Filter/Filter';
+import { nanoid } from 'nanoid';
 
-export class Phonebook extends Component {
-  static defaultPropTypes = {
-    initialContacts: PropTypes.array.isRequired,
-    initialFilter: PropTypes.string.isRequired,
-  };
+export function Phonebook({ initialContacts, initialFilter }) {
+  const [contacts, setContacts] = useState(initialContacts);
+  const [filter, setFilter] = useState(initialFilter);
 
-  state = {
-    contacts: this.props.initialContacts,
-    filter: this.props.initialFilter,
-  };
-
-  addContacts = ({ id, name, number }) => {
+  const addContacts = ({ id, name, number }) => {
     const addedName = name;
 
-    for (const contact of this.state.contacts) {
+    for (const contact of contacts) {
       if (addedName === contact.name) {
         Notification(addedName);
         return;
       }
     }
-
-    this.setState(({ contacts }) => ({
-      contacts: [...contacts, { id, name, number }],
-    }));
+    id = nanoid(4);
+    setContacts(contacts => (contacts = [...contacts, { id, name, number }]));
   };
 
-  changeFilter = evt => this.setState({ filter: evt.currentTarget.value });
+  const changeFilter = evt => setFilter(evt.currentTarget.value);
 
-  removeContact = contactID => {
-    this.setState(prevState => {
-      return {
-        contacts: prevState.contacts.filter(({ id }) => id !== contactID),
-      };
-    });
+  const normalizedFilter = filter.toLocaleLowerCase();
+  const filteredContacts = contacts.filter(contact =>
+    contact.name.toLocaleLowerCase().includes(normalizedFilter)
+  );
+
+  const removeContact = contactID => {
+    setContacts(contacts => contacts.filter(({ id }) => id !== contactID));
   };
 
-  render() {
-    const { contacts, filter } = this.state;
-    const normalizedFilter = filter.toLocaleLowerCase();
-    const filteredContacts = contacts.filter(contact =>
-      contact.name.toLocaleLowerCase().includes(normalizedFilter)
-    );
-
-    return (
-      <WrapperPhonebook>
-        <Box pt={4} pb={2} m={0} color={theme.colors.heading} as="h1">
-          Phonebook
-        </Box>
-        <ContactForm dataContacts={this.addContacts} />
-        <Box m={0} mb={3} color={theme.colors.heading} as="h1">
-          Contacts
-        </Box>
-        <Filter value={filter} changeFilter={this.changeFilter} />
-        <WrapperContacts>
-          <ContactsList
-            contacts={filteredContacts}
-            removeContact={this.removeContact}
-          />
-        </WrapperContacts>
-      </WrapperPhonebook>
-    );
-  }
+  return (
+    <WrapperPhonebook>
+      <Box pt={4} pb={2} m={0} color={theme.colors.heading} as="h1">
+        Phonebook
+      </Box>
+      <ContactForm dataContacts={addContacts} />
+      <Box m={0} mb={3} color={theme.colors.heading} as="h1">
+        Contacts
+      </Box>
+      <Filter value={filter} changeFilter={changeFilter} />
+      <WrapperContacts>
+        <ContactsList
+          contacts={filteredContacts}
+          removeContact={removeContact}
+        />
+      </WrapperContacts>
+    </WrapperPhonebook>
+  );
 }
+
+Phonebook.propTypes = {
+  initialContacts: PropTypes.array.isRequired,
+  initialFilter: PropTypes.string.isRequired,
+};

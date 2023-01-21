@@ -1,64 +1,68 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FormContainer, Input, Button, Label } from './ContactForm.styled';
 import { patternName, patternNumber } from '../../utils/patterns';
 import { messageForName, messageForNumber } from '../../utils/messages';
-// import { Formik, Form, Field, ErrorMessage } from 'formik';
-// import * as Yup from 'yup';
 
-const INITIAL_STATE = { name: '', number: '' };
+export function ContactForm({ dataContacts }) {
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
 
-export class ContactForm extends Component {
-  static defaultPropTypes = {
-    name: PropTypes.string.isRequired,
-    number: PropTypes.string.isRequired,
+  const handleChangeInput = evt => {
+    switch (evt.target.name) {
+      case 'name':
+        setName(evt.target.value);
+        break;
+      case 'number':
+        setNumber(evt.target.value);
+        break;
+      default:
+        return;
+    }
   };
 
-  state = INITIAL_STATE;
-
-  handleChangeInput = evt => {
-    const targetInput = evt.currentTarget;
-    this.setState({ [targetInput.name]: targetInput.value });
+  const resetForm = evt => {
+    evt.target.elements.name.value = '';
+    evt.target.elements.number.value = '';
+    setName('');
+    setNumber('');
   };
 
-  handleFormSubmit = evt => {
+  const handleFormSubmit = evt => {
     evt.preventDefault();
-    this.props.dataContacts({ ...this.state });
-    this.resetForm();
+    dataContacts({ name, number });
+    resetForm(evt);
   };
 
-  resetForm = () => this.setState(INITIAL_STATE);
-
-  render() {
-    const { name, number } = this.state;
-    return (
-      <FormContainer onSubmit={this.handleFormSubmit}>
-        <Label>
-          Name
-          <Input
-            type="text"
-            name="name"
-            pattern={patternName}
-            title={messageForName}
-            required
-            value={name}
-            onChange={this.handleChangeInput}
-          />
-        </Label>
-        <Label>
-          Number
-          <Input
-            type="tel"
-            name="number"
-            pattern={patternNumber}
-            title={messageForNumber}
-            required
-            value={number}
-            onChange={this.handleChangeInput}
-          />
-        </Label>
-        <Button type="submit">Add contact</Button>
-      </FormContainer>
-    );
-  }
+  return (
+    <FormContainer onSubmit={handleFormSubmit}>
+      <Label>
+        Name
+        <Input
+          type="text"
+          name="name"
+          pattern={patternName}
+          title={messageForName}
+          required
+          onChange={handleChangeInput}
+        />
+      </Label>
+      <Label>
+        Number
+        <Input
+          type="tel"
+          name="number"
+          pattern={patternNumber}
+          title={messageForNumber}
+          required
+          onChange={handleChangeInput}
+        />
+      </Label>
+      <Button type="submit">Add contact</Button>
+    </FormContainer>
+  );
 }
+
+ContactForm.propTypes = {
+  dataContacts: PropTypes.func,
+};
