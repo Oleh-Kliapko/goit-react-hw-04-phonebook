@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Notification } from '../../utils/notification';
 import { theme } from '../../utils/theme';
@@ -10,8 +10,14 @@ import { Filter } from '../Filter/Filter';
 import { nanoid } from 'nanoid';
 
 export function Phonebook({ initialContacts, initialFilter }) {
-  const [contacts, setContacts] = useState(initialContacts);
+  const [contacts, setContacts] = useState(
+    JSON.parse(window.localStorage.getItem('contacts')) ?? initialContacts
+  );
   const [filter, setFilter] = useState(initialFilter);
+
+  useEffect(() => {
+    window.localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
   const addContacts = ({ id, name, number }) => {
     const addedName = name;
