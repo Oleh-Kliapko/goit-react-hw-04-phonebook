@@ -20,14 +20,12 @@ export function Phonebook({ initialContacts, initialFilter }) {
   }, [contacts]);
 
   const addContacts = ({ id, name, number }) => {
-    const addedName = name;
-
-    for (const contact of contacts) {
-      if (addedName === contact.name) {
-        Notification(addedName);
-        return;
-      }
+    const isFindName = contacts.find(contact => contact.name === name);
+    if (isFindName) {
+      Notification(name);
+      return;
     }
+
     id = nanoid(4);
     setContacts(contacts => (contacts = [...contacts, { id, name, number }]));
   };
